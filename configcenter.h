@@ -5,15 +5,18 @@
 #include <QObject>
 #include <QSettings>
 #include <QHostAddress>
+#include <QGeoCoordinate>
+#include <QScreen>
 
 class SCHEDULERSHARED_EXPORT ConfigCenter : public QObject
 {
     Q_OBJECT
 public:
     static ConfigCenter *instance();
+    static int ddsID();
+    static QScreen *screen();
     static QString elevationPath();
-    static QPair<int,int> DTUBeginPort();
-    static QString DTUServerAddress();
+    static QGeoCoordinate homePosition();
 private:
     explicit ConfigCenter(QObject *parent = nullptr);
 

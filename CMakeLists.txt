@@ -26,13 +26,20 @@ add_library(${PROJECT_NAME} SHARED
     packetutilityv2.cpp
     scheduler.cpp
     )
+add_library(Lib::Scheduler ALIAS ${PROJECT_NAME})
 
 #
-find_package(Qt5 REQUIRED COMPONENTS Core Network )
+find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Network Positioning)
 
 #
 set(DDS_ROOT ${PROJECT_SOURCE_DIR}/3rdParty/CloudBus)
-target_include_directories(${PROJECT_NAME} PRIVATE ${DDS_ROOT}/include)
-target_link_libraries(${PROJECT_NAME} debug ${DDS_ROOT}/x64/VS2013/CloudBusd.lib optimized ${DDS_ROOT}/x64/VS2013/CloudBus.lib)
-target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Network)
+target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR})
+target_include_directories(${PROJECT_NAME} PUBLIC ${DDS_ROOT}/include)
+target_link_libraries(${PROJECT_NAME} PUBLIC debug ${DDS_ROOT}/x64/VS2013/CloudBusd.lib optimized ${DDS_ROOT}/x64/VS2013/CloudBus.lib)
+target_link_libraries(${PROJECT_NAME} PUBLIC Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Network Qt5::Positioning)
 target_compile_definitions(${PROJECT_NAME} PRIVATE SCHEDULER_LIBRARY)
+
+#
+install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION install)
+install(FILES ${DDS_ROOT}/x64/VS2013/CloudBusd.dll CONFIGURATIONS Debug DESTINATION install)
+install(FILES ${DDS_ROOT}/x64/VS2013/CloudBus.dll CONFIGURATIONS Release DESTINATION install)
