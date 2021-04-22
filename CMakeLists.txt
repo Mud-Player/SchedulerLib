@@ -1,0 +1,38 @@
+﻿cmake_minimum_required(VERSION 3.5)
+
+project(SchedulerLib LANGUAGES CXX)
+set(CMAKE_DEBUG_POSTFIX d)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
+
+#
+add_library(${PROJECT_NAME} SHARED
+    configcenter.h
+    ddsnetwork.h
+    dtunetwork.h
+    packetutility.h
+    packetutilityv2.h
+    scheduler.h
+    scheduler_global.h
+    configcenter.cpp
+    ddsnetwork.cpp
+    dtunetwork.cpp
+    packetutility.cpp
+    packetutilityv2.cpp
+    scheduler.cpp
+    )
+
+#
+find_package(Qt5 REQUIRED COMPONENTS Core Network )
+
+#
+set(DDS_ROOT ${PROJECT_SOURCE_DIR}/3rdParty/CloudBus)
+target_include_directories(${PROJECT_NAME} PRIVATE ${DDS_ROOT}/include)
+target_link_libraries(${PROJECT_NAME} debug ${DDS_ROOT}/x64/VS2013/CloudBusd.lib optimized ${DDS_ROOT}/x64/VS2013/CloudBus.lib)
+target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Network)
+target_compile_definitions(${PROJECT_NAME} PRIVATE SCHEDULER_LIBRARY)
