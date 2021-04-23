@@ -17,6 +17,7 @@ add_library(${PROJECT_NAME} SHARED
     dtunetwork.h
     packetutility.h
     packetutilityv2.h
+    packetutilityv3.h
     scheduler.h
     scheduler_global.h
     configcenter.cpp
@@ -24,6 +25,7 @@ add_library(${PROJECT_NAME} SHARED
     dtunetwork.cpp
     packetutility.cpp
     packetutilityv2.cpp
+    packetutilityv3.cpp
     scheduler.cpp
     )
 add_library(Lib::Scheduler ALIAS ${PROJECT_NAME})
