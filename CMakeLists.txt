@@ -30,9 +30,9 @@ add_library(Lib::Scheduler ALIAS ${PROJECT_NAME})
 
 #
 find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Network Positioning)
+set(DDS_ROOT ${PROJECT_SOURCE_DIR}/3rdParty/CloudBus)
 
 #
-set(DDS_ROOT ${PROJECT_SOURCE_DIR}/3rdParty/CloudBus)
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR})
 target_include_directories(${PROJECT_NAME} PUBLIC ${DDS_ROOT}/include)
 target_link_libraries(${PROJECT_NAME} PUBLIC debug ${DDS_ROOT}/x64/VS2013/CloudBusd.lib optimized ${DDS_ROOT}/x64/VS2013/CloudBus.lib)
