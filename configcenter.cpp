@@ -50,6 +50,25 @@ QGeoCoordinate ConfigCenter::homePosition()
     m_settings.endGroup();
     return QGeoCoordinate(lat, lon, alt);
 }
+QPair<int, int> ConfigCenter::DTUBeginPort()
+{
+    m_settings.beginGroup("DTU");
+    int servelPort = m_settings.value("ServerPort", 10001).toInt();
+    int localPort = m_settings.value("LocalPort", 20001).toInt();
+    m_settings.setValue("ServerPort", servelPort);
+    m_settings.setValue("LocalPort", localPort);
+    m_settings.endGroup();
+    return qMakePair(servelPort, localPort);
+}
+
+QHostAddress ConfigCenter::DTUServerAddress()
+{
+    m_settings.beginGroup("DTU");
+    QString addr = m_settings.value("ServerAddr", QString("192.168.0.233")).toString();
+    m_settings.setValue("ServerAddr", addr);
+    m_settings.endGroup();
+    return QHostAddress(addr);
+}
 
 ConfigCenter::ConfigCenter(QObject *parent) : QObject(parent)
 {

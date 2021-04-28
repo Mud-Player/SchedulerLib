@@ -17,6 +17,8 @@ public:
     static QScreen *screen();
     static QString elevationPath();
     static QGeoCoordinate homePosition();
+    static QPair<int,int> DTUBeginPort();
+    static QHostAddress DTUServerAddress();
 private:
     explicit ConfigCenter(QObject *parent = nullptr);
 
