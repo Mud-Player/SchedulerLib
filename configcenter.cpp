@@ -70,6 +70,15 @@ QHostAddress ConfigCenter::DTUServerAddress()
     return QHostAddress(addr);
 }
 
+bool ConfigCenter::saveDatabase() const
+{
+    return m_saveDatabase;
+}
+
 ConfigCenter::ConfigCenter(QObject *parent) : QObject(parent)
 {
+    m_settings.beginGroup("Database");
+    m_saveDatabase = m_settings.value("Run", false).toBool();
+    m_settings.setValue("Run", m_saveDatabase);
+    m_settings.endGroup();
 }
