@@ -4,7 +4,7 @@
 QSettings ConfigCenter::m_settings("Config.ini", QSettings::IniFormat);
 ConfigCenter *ConfigCenter::instance()
 {
-    static ConfigCenter *ins;
+    static ConfigCenter *ins = new ConfigCenter;
     return ins;
 }
 
