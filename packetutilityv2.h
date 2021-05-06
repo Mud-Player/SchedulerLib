@@ -30,7 +30,6 @@ public:
     template<class T>
     void setFixed(T *st); ///<压入一个结构体
 
-    ~PacketEncoderFixed();
 private:
     QByteArray m_buf;            ///<数据首地址
     int m_id;
@@ -48,6 +47,7 @@ public:
     int UAVType();       ///<获取无人机类型
     template<class T>
     const T *getFixed(); ///<取出一个结构体
+
 private:
     const char *m_buf;            ///<数据首地址
 };
@@ -69,7 +69,6 @@ public:
     template<class T>
     void setVariable(T st[], int count); ///<压入一个结构体数组
 
-    ~PacketEncoderVariable();
 private:
     QByteArray m_buf;            ///<数据首地址
     int m_id;

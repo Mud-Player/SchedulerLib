@@ -10,6 +10,11 @@ char *PacketEncoderFixedV2::data()
     return m_buf.data();
 }
 
+unsigned int PacketEncoderFixedV2::size()
+{
+    return m_buf.size();
+}
+
 void PacketEncoderFixedV2::setUAVID(int id)
 {
     m_id = id;
@@ -48,6 +53,11 @@ quint8 PacketDecoderFixedV2::redOrBlue()
 PacketEncoderVariableV2::PacketEncoderVariableV2()
 {
     m_buf.reserve(1024);
+}
+
+unsigned int PacketEncoderVariableV2::size()
+{
+    return m_buf.size();
 }
 
 void PacketEncoderVariableV2::setUAVID(int id)

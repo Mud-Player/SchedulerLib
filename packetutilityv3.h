@@ -24,15 +24,14 @@ inline quint8 CRC8(const char *buf, int length)
 class SCHEDULERSHARED_EXPORT PacketEncoderFixedV2{
 public:
     PacketEncoderFixedV2();
-    char *data();           ///<获取内存数据
-    unsigned int size();    ///<数据长度
-    void setUAVID(int id);  ///<设置无人机ID
-    void setUAVType(int type); ///<设置无人机类型
+    char *data();                      ///<获取内存数据
+    unsigned int size();               ///<数据长度
+    void setUAVID(int id);             ///<设置无人机ID
+    void setUAVType(int type);         ///<设置无人机类型
     void setRedOrBlue(quint8 type);    ///<设置红蓝方
     template<class T>
-    void setFixed(T *st); ///<压入一个结构体
+    void setFixed(T *st);              ///<压入一个结构体
 
-    ~PacketEncoderFixedV2();
 private:
     QByteArray m_buf;            ///<数据首地址
     int m_id;
@@ -48,13 +47,13 @@ private:
 class SCHEDULERSHARED_EXPORT PacketDecoderFixedV2{
 public:
     PacketDecoderFixedV2(const char* buf);
-    int UAVID();         ///<获取无人机ID
-    int UAVType();       ///<获取无人机类型
-    quint8 redOrBlue();  ///<红蓝方
+    int UAVID();             ///<获取无人机ID
+    int UAVType();           ///<获取无人机类型
+    quint8 redOrBlue();      ///<红蓝方
     template<class T>
     const T *getFixed(); ///<取出一个结构体
 private:
-    const char *m_buf;            ///<数据首地址
+    const char *m_buf;  ///<数据首地址
 };
 
 /*!
@@ -66,17 +65,16 @@ private:
 class SCHEDULERSHARED_EXPORT PacketEncoderVariableV2{
 public:
     PacketEncoderVariableV2();
-    char *data();           ///<获取内存数据
-    unsigned int size();    ///<数据长度
-    void setUAVID(int id);  ///<设置无人机ID
-    void setUAVType(int type); ///<设置无人机类型
-    void setRedOrBlue(quint8 type);    ///<设置红蓝方
+    char *data();                        ///<获取内存数据
+    unsigned int size();                 ///<数据长度
+    void setUAVID(int id);               ///<设置无人机ID
+    void setUAVType(int type);           ///<设置无人机类型
+    void setRedOrBlue(quint8 type);      ///<设置红蓝方
     template<class T>
-    void setFixed(T *st);    ///<压入一个定长结构体
+    void setFixed(T *st);                ///<压入一个定长结构体
     template<class T>
     void setVariable(T st[], int count); ///<压入一个结构体数组
 
-    ~PacketEncoderVariableV2();
 private:
     QByteArray m_buf;            ///<数据首地址
     int m_id;

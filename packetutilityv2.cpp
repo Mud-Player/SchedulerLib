@@ -12,6 +12,11 @@ char *PacketEncoderFixed::data()
     return m_buf.data();
 }
 
+unsigned int PacketEncoderFixed::size()
+{
+    return m_buf.size();
+}
+
 void PacketEncoderFixed::setUAVID(int id)
 {
     m_id = id;
@@ -40,6 +45,11 @@ int PacketDecoderFixed::UAVType()
 PacketEncoderVariable::PacketEncoderVariable()
 {
     m_buf.reserve(1024);
+}
+
+unsigned int PacketEncoderVariable::size()
+{
+    return m_buf.size();
 }
 
 void PacketEncoderVariable::setUAVID(int id)
