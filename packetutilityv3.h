@@ -110,8 +110,8 @@ void PacketEncoderFixedV2::setFixed(T *st)
     auto pktLen = 9 + sizeof (T) + 1;
     // Header
     m_buf.append(9, 0);
-    m_buf[0] = 0xAA;          //fixValue
-    m_buf[1] = 0x55;          //fixValue
+    m_buf[0] = (char)0xAA;    //fixValue
+    m_buf[1] = (char)0x55;    //fixValue
     m_buf[2] = pktLen;        //pktLen
     m_buf[4] = 0; //loopCount
     m_buf[5] = m_id;          //UAVID
@@ -119,7 +119,7 @@ void PacketEncoderFixedV2::setFixed(T *st)
     m_buf[7] = m_redOrBlue;   //RedOrBlue
     m_buf[8] = 1;             //pktType
     // T
-    m_buf.append(st, sizeof(T));
+    m_buf.append((char*)st, sizeof(T));
     // Tail
     m_buf.append(CRC8(m_buf.data(), m_buf.size() - 1));
 }
@@ -146,13 +146,13 @@ void PacketEncoderVariableV2::setVariable(T st[], int count)
     auto pktLen = m_buf.size() + count * sizeof (T) + 1;
 
     // T[]
-    m_buf.append(st, count + sizeof (T));
+    m_buf.append((char*)st, count + sizeof (T));
 
     // Header(8byte) = fixValue(0) + fixValue(1) + pktLen(2) + loopCount(4) + UAVID(5) + UAVType(6) + RedOrBlue(7) + pktType(8)
     // ArrayHeader(5byte) = publiLen(0) + onArrayLen(1) + arrayCountAll(2) + arrayCountInPkt(3) + startArrayIndexInPkt(4);
     //Header
-    m_buf[0] = 0xAA;          //fixValue
-    m_buf[1] = 0x55;          //fixValue
+    m_buf[0] = (char)0xAA;    //fixValue
+    m_buf[1] = (char)0x55;    //fixValue
     m_buf[2] = pktLen;        //pktLen
     m_buf[4] = 0; //loopCount
     m_buf[5] = m_id;          //UAVID

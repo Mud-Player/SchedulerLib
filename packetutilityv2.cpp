@@ -47,6 +47,11 @@ PacketEncoderVariable::PacketEncoderVariable()
     m_buf.reserve(1024);
 }
 
+char *PacketEncoderVariable::data()
+{
+    return m_buf.data();
+}
+
 unsigned int PacketEncoderVariable::size()
 {
     return m_buf.size();
