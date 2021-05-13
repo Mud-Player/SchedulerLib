@@ -107,7 +107,7 @@ void PacketEncoderFixed::setFixed(T *st)
     m_buf[4] = 0; //loopCount
     m_buf[5] = m_id;          //UAVID
     m_buf[6] = m_type;        //UAVType
-    m_buf[7] = 1;             //pktType
+    m_buf[7] = 0;             //pktType
     // T
     m_buf.append(st, sizeof(T));
     // Tail

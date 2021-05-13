@@ -113,11 +113,11 @@ void PacketEncoderFixedV2::setFixed(T *st)
     m_buf[0] = (char)0xAA;    //fixValue
     m_buf[1] = (char)0x55;    //fixValue
     m_buf[2] = pktLen;        //pktLen
-    m_buf[4] = 0; //loopCount
+    m_buf[4] = 0;             //loopCount
     m_buf[5] = m_id;          //UAVID
     m_buf[6] = m_type;        //UAVType
     m_buf[7] = m_redOrBlue;   //RedOrBlue
-    m_buf[8] = 1;             //pktType
+    m_buf[8] = 0;             //pktType
     // T
     m_buf.append((char*)st, sizeof(T));
     // Tail
@@ -154,7 +154,7 @@ void PacketEncoderVariableV2::setVariable(T st[], int count)
     m_buf[0] = (char)0xAA;    //fixValue
     m_buf[1] = (char)0x55;    //fixValue
     m_buf[2] = pktLen;        //pktLen
-    m_buf[4] = 0; //loopCount
+    m_buf[4] = 0;             //loopCount
     m_buf[5] = m_id;          //UAVID
     m_buf[6] = m_redOrBlue;   //RedOrBlue
     m_buf[7] = m_type;        //UAVType
@@ -172,19 +172,19 @@ void PacketEncoderVariableV2::setVariable(T st[], int count)
 template<class T>
 const T *PacketDecoderVariableV2::getFixed()
 {
-    if(*reinterpret_cast<const quint8*>(m_buf+8) == 0)
+    if(*reinterpret_cast<const quint8*>(m_buf+9) == 0)
         return nullptr;
     else
-        return reinterpret_cast<const T*>(m_buf+8+5);
+        return reinterpret_cast<const T*>(m_buf+9+5);
 }
 
 template<class T>
 const QPair<int, const T *> PacketDecoderVariableV2::getVariable()
 {
-    int publicLen = *reinterpret_cast<const quint8*>(m_buf+8);
+    int publicLen = *reinterpret_cast<const quint8*>(m_buf+9);
     QPair<int, const T*> ret;
-    ret.first = *reinterpret_cast<const quint8*>(m_buf+8+2);
-    ret.second = reinterpret_cast<const T*>(m_buf+8+5+publicLen);
+    ret.first = *reinterpret_cast<const quint8*>(m_buf+9+2);
+    ret.second = reinterpret_cast<const T*>(m_buf+9+5+publicLen);
     return ret;
 }
 #endif // PACKETUTILITYV2_H

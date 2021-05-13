@@ -124,7 +124,7 @@ void Scheduler::regDDSCallback(Callback *callback, const QString &ddsTopic)
         return;
     }
     if(m_ddsCallbacks.contains(ddsTopic, callback)) {
-        qDebug()<<"You don't need to register DDS twice: " << ddsTopic;
+        qDebug()<<"You don't need to register DDS twice: " << ddsTopic << "for " << callback->objectName();
         return;
     }
     // if had ever been registerd, so register it to DDSNetwork
