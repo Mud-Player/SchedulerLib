@@ -29,18 +29,36 @@ QScreen *ConfigCenter::screen()
     return screens[screenNumber-1];
 }
 
+QRect ConfigCenter::geometry()
+{
+    m_settings.beginGroup("Screen");
+    QRect rect = m_settings.value("Geometry", QRect(0, 0, 1920, 1080)).toRect();
+    m_settings.setValue("Geometry", rect);
+    m_settings.endGroup();
+    return rect;
+}
+
 QString ConfigCenter::elevationPath()
 {
     m_settings.beginGroup("DEM");
-    QString demPath = m_settings.value("DEMPath", "E:/SRTM_DEM_China").toString();
-    m_settings.setValue("DEMPath", demPath);
+    QString demPath = m_settings.value("Path", "E:/SRTM_DEM_China").toString();
+    m_settings.setValue("Path", demPath);
     m_settings.endGroup();
     return demPath;
 }
 
+QString ConfigCenter::mapPath(const QString &type)
+{
+    m_settings.beginGroup("Map");
+    QString path = m_settings.value(type, "E:\arcgis").toString();
+    m_settings.setValue(type, path);
+    m_settings.endGroup();
+    return path;
+}
+
 QGeoCoordinate ConfigCenter::homePosition()
 {
-    m_settings.beginGroup("MapHome");
+    m_settings.beginGroup("Map");
     double lat = m_settings.value("Latitude", 40.4015).toDouble();
     double lon = m_settings.value("Longitude", 99.7895).toDouble();
     double alt = m_settings.value("Altitude", 9000).toDouble();
@@ -70,15 +88,24 @@ QHostAddress ConfigCenter::DTUServerAddress()
     return QHostAddress(addr);
 }
 
-bool ConfigCenter::saveDatabase() const
+bool ConfigCenter::saveDebug()
 {
-    return m_saveDatabase;
+    m_settings.beginGroup("Debug");
+    bool save = m_settings.value("Sava", false).toBool();
+    m_settings.setValue("Save", save);
+    m_settings.endGroup();
+    return save;
+}
+
+QVariant ConfigCenter::config(const QString &name)
+{
+    m_settings.beginGroup("Config");
+    auto config = m_settings.value(name);
+    m_settings.setValue(name, config);
+    m_settings.endGroup();
+    return name;
 }
 
 ConfigCenter::ConfigCenter(QObject *parent) : QObject(parent)
 {
-    m_settings.beginGroup("Database");
-    m_saveDatabase = m_settings.value("Run", false).toBool();
-    m_settings.setValue("Run", m_saveDatabase);
-    m_settings.endGroup();
 }
