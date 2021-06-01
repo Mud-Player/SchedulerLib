@@ -50,7 +50,7 @@ QString ConfigCenter::elevationPath()
 QString ConfigCenter::mapPath(const QString &type)
 {
     m_settings.beginGroup("Map");
-    QString path = m_settings.value(type, "E:\arcgis").toString();
+    QString path = m_settings.value(type, "E:/Arcgis").toString();
     m_settings.setValue(type, path);
     m_settings.endGroup();
     return path;
