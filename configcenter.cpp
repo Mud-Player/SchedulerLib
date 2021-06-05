@@ -103,7 +103,7 @@ QVariant ConfigCenter::config(const QString &name)
     auto config = m_settings.value(name);
     m_settings.setValue(name, config);
     m_settings.endGroup();
-    return name;
+    return config;
 }
 
 ConfigCenter::ConfigCenter(QObject *parent) : QObject(parent)
