@@ -5,6 +5,32 @@
 #include <QObject>
 extern quint8 g_loopCount;
 
+#pragma pack(1)
+/// 定长数据包、变长数据包公共包头
+namespace PacketV2 {
+struct BasicPktHeader
+{
+    quint8  fixValue1;    //固定值 0xAA
+    quint8  fixValue2;    //固定值 0x55
+    quint16 pktLen;       //包长度 本数据帧的节数总字
+    quint8  loopCount;    //循环计数器
+    quint8  UAVID;        //无人机ID
+    quint8  UAVType;      //无人机类型
+    quint8  pktType;      //数据包类型 0-定长包 1-变长包
+};
+
+/// 变长数据包包头
+struct ArrayPktHeader
+{
+    quint8 publicLen;                //公共数据块字节数
+    quint8 oneArrayLen;              //单个周期数据块字节数
+    quint8 arrayCountAll;            //周期数据块总数
+    quint8 arrayCountInPkt;          //当次周期数据块个数
+    quint8 startArrayIndexInPkt;     //当次起始周期数据块序号
+};
+}
+#pragma pack()
+
 inline quint8 CRC8(const char *buf, int length)
 {
     quint8 sum = 0;
@@ -96,35 +122,24 @@ private:
 template<class T>
 void PacketEncoderFixed::setFixed(T *st)
 {
-    // Header(8byte) = fixValue(0) + fixValue(1) + pktLen(2) + loopCount(4) + UAVID(5) + UAVType(6) + pktType(7)
-    // Tail(1byte) = crcSum(1)
-    auto pktLen = 8 + sizeof (T) + 1;
-    // Header
-    m_buf.append(8, 0);
-    m_buf[0] = 0xAA;          //fixValue
-    m_buf[1] = 0x55;          //fixValue
-    *reinterpret_cast<quint16*>(m_buf.data()+2) = pktLen;        //pktLen
-    m_buf[4] = 0; //loopCount
-    m_buf[5] = m_id;          //UAVID
-    m_buf[6] = m_type;        //UAVType
-    m_buf[7] = 0;             //pktType
     // T
-    m_buf.append(st, sizeof(T));
+    m_buf.append((char*)st, sizeof(T));
     // Tail
     m_buf.append(CRC8(m_buf.data(), m_buf.size() - 1));
+    // Header
+    PacketV2::BasicPktHeader *header = reinterpret_cast<PacketV2::BasicPktHeader*>(m_buf.data());
+    header->pktLen = m_buf.size();
 }
 
 template<class T>
 const T *PacketDecoderFixed::getFixed()
 {
-    return reinterpret_cast<const T*>(m_buf+8);
+    return reinterpret_cast<const T*>(m_buf + sizeof (PacketV2::BasicPktHeader));
 }
 
 template<class T>
 void PacketEncoderVariable::setFixed(T *st)
 {
-    m_buf.append(8, 0); //Header
-    m_buf.append(5, 0); //ArrayHeader
     // T
     m_buf.append(st, sizeof (T));
 }
@@ -132,48 +147,39 @@ void PacketEncoderVariable::setFixed(T *st)
 template<class T>
 void PacketEncoderVariable::setVariable(T st[], int count)
 {
-    int fixedSize = m_buf.size() - 8 - 5;
-    auto pktLen = m_buf.size() + count * sizeof (T) + 1;
-
     // T[]
-    m_buf.append(st, count * sizeof (T));
-
-    // Header(8byte) = fixValue(0) + fixValue(1) + pktLen(2) + loopCount(4) + UAVID(5) + UAVType(6) + pktType(7)
-    // ArrayHeader(5byte) = publiLen(0) + onArrayLen(1) + arrayCountAll(2) + arrayCountInPkt(3) + startArrayIndexInPkt(4);
-    //Header
-    m_buf[0] = 0xAA;          //fixValue
-    m_buf[1] = 0x55;          //fixValue
-    *reinterpret_cast<quint16*>(m_buf.data()+2) = pktLen;        //pktLen
-    m_buf[4] = 0; //loopCount
-    m_buf[5] = m_id;          //UAVID
-    m_buf[6] = m_type;        //UAVType
-    m_buf[7] = 1;             //pktType
+    m_buf.append((char*)st, count * sizeof (T));
     //ArrayHeader
-    m_buf[8] = fixedSize;     //publicLen
-    m_buf[9] = sizeof (T);    //oneArrayLen
-    m_buf[10] = count;        //arrayCountAll
-    m_buf[11] = count;        //arrayCountInPkt
-    m_buf[12] = 0;            //startArrayIndexInPkt
+    PacketV2::ArrayPktHeader *header = reinterpret_cast<PacketV2::ArrayPktHeader*>(m_buf.data()+sizeof (PacketV2::BasicPktHeader));
+    header->oneArrayLen = sizeof (T);
+    header->arrayCountAll = count;
+    header->arrayCountInPkt = count;
+    header->startArrayIndexInPkt = 0;
     //Tail
     m_buf.append(CRC8(m_buf.data(), m_buf.size() - 1));
+    // Header
+    PacketV2::BasicPktHeader *bHeader = reinterpret_cast<PacketV2::BasicPktHeader*>(m_buf.data());
+    bHeader->pktLen = m_buf.size();
 }
 
 template<class T>
 const T *PacketDecoderVariable::getFixed()
 {
-    if(*reinterpret_cast<const quint8*>(m_buf+8) == 0)
+    if(*reinterpret_cast<const quint8*>(m_buf + sizeof (PacketV2::BasicPktHeader)) == 0)
         return nullptr;
     else
-        return reinterpret_cast<const T*>(m_buf+8+5);
+        return reinterpret_cast<const T*>(m_buf + sizeof (PacketV2::BasicPktHeader) + sizeof(PacketV2::ArrayPktHeader));
 }
 
 template<class T>
 const QPair<int, const T *> PacketDecoderVariable::getVariable()
 {
-    int publicLen = *reinterpret_cast<const quint8*>(m_buf+8);
+    const PacketV2::ArrayPktHeader *header = reinterpret_cast<const PacketV2::ArrayPktHeader*>(m_buf + sizeof (PacketV2::BasicPktHeader));
+    int publicLen = header->publicLen;
+
     QPair<int, const T*> ret;
-    ret.first = *reinterpret_cast<const quint8*>(m_buf+8+2);
-    ret.second = reinterpret_cast<const T*>(m_buf+8+5+publicLen);
+    ret.first = header->arrayCountAll;
+    ret.second = reinterpret_cast<const T*>(m_buf + sizeof (PacketV2::BasicPktHeader) + sizeof (PacketV2::ArrayPktHeader) + publicLen);
     return ret;
 }
 #endif // PACKETUTILITYV2_H
