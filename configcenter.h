@@ -16,7 +16,6 @@ class SCHEDULERSHARED_EXPORT ConfigCenter : public QObject
 {
     Q_OBJECT
 public:
-    static ConfigCenter *instance();
     /// DDS ID
     static int ddsID();
     /// 显示屏幕
@@ -35,6 +34,8 @@ public:
     static QHostAddress DTUServerAddress();
     /// 是否保存调试数据
     static bool saveDebug();
+    /// 当前是否为飞行席位
+    static bool isFlySet();
     /// 自定义配置
     static QVariant config(const QString &name);
 private:

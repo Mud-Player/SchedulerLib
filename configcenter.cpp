@@ -2,11 +2,6 @@
 #include <QApplication>
 
 QSettings ConfigCenter::m_settings("Config.ini", QSettings::IniFormat);
-ConfigCenter *ConfigCenter::instance()
-{
-    static ConfigCenter *ins = new ConfigCenter;
-    return ins;
-}
 
 int ConfigCenter::ddsID()
 {
@@ -95,6 +90,15 @@ bool ConfigCenter::saveDebug()
     m_settings.setValue("Save", save);
     m_settings.endGroup();
     return save;
+}
+
+bool ConfigCenter::isFlySet()
+{
+    m_settings.beginGroup("Station");
+    bool ret = m_settings.value("IsFlySeat", true).toBool();
+    m_settings.setValue("IsFlySeat", ret);
+    m_settings.endGroup();
+    return ret;
 }
 
 QVariant ConfigCenter::config(const QString &name)
