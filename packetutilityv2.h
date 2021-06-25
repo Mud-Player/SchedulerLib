@@ -141,7 +141,7 @@ template<class T>
 void PacketEncoderVariable::setFixed(T *st)
 {
     // T
-    m_buf.append(st, sizeof (T));
+    m_buf.append((char*)st, sizeof (T));
 }
 
 template<class T>
@@ -151,7 +151,7 @@ void PacketEncoderVariable::setVariable(T st[], int count)
     m_buf.append((char*)st, count * sizeof (T));
     //ArrayHeader
     PacketV2::ArrayPktHeader *header = reinterpret_cast<PacketV2::ArrayPktHeader*>(m_buf.data()+sizeof (PacketV2::BasicPktHeader));
-    header->oneArrayLen = sizeof (T);
+    header->oneArrayLen = quint8(sizeof (T));
     header->arrayCountAll = count;
     header->arrayCountInPkt = count;
     header->startArrayIndexInPkt = 0;

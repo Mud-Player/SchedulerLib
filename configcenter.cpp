@@ -101,6 +101,13 @@ bool ConfigCenter::isFlySet()
     return ret;
 }
 
+int ConfigCenter::seatId()
+{
+	bool ret = m_settings.value("SeatId", 1).toInt();
+	m_settings.setValue("SeatId", ret);
+	return ret;
+}
+
 QVariant ConfigCenter::config(const QString &name)
 {
     m_settings.beginGroup("Config");

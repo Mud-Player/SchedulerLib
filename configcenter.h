@@ -36,6 +36,8 @@ public:
     static bool saveDebug();
     /// 当前是否为飞行席位
     static bool isFlySet();
+	/// 席位id
+	static int seatId();
     /// 自定义配置
     static QVariant config(const QString &name);
 private:
