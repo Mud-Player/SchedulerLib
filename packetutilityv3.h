@@ -144,6 +144,8 @@ const T *PacketDecoderFixedV2::getFixed()
 template<class T>
 void PacketEncoderVariableV2::setFixed(T *st)
 {
+    PacketV3::ArrayPktHeader *header = reinterpret_cast<PacketV3::ArrayPktHeader*>(m_buf.data()+sizeof (PacketV3::BasicPktHeader));
+    header->publicLen = sizeof(T);
     // T
     m_buf.append((char*)st, sizeof (T));
 }
