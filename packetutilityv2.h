@@ -93,7 +93,7 @@ public:
     template<class T>
     void setFixed(T *st);    ///<压入一个定长结构体
     template<class T>
-    void setVariable(T st[], int count); ///<压入一个结构体数组
+    void setVariable(T *st, int count); ///<压入一个结构体数组
 
 private:
     QByteArray m_buf;            ///<数据首地址
@@ -145,7 +145,7 @@ void PacketEncoderVariable::setFixed(T *st)
 }
 
 template<class T>
-void PacketEncoderVariable::setVariable(T st[], int count)
+void PacketEncoderVariable::setVariable(T *st, int count)
 {
     // T[]
     m_buf.append((char*)st, count * sizeof (T));
