@@ -87,7 +87,7 @@ void Scheduler::startDDS(int ddsID)
 void Scheduler::startUDP(const QHostAddress &group, int bindPort)
 {
     connect(&m_udpNetwork, &QUdpSocket::readyRead, this, &Scheduler::readUDPPendingDatagrams, Qt::AutoConnection);  //really a Qt::DirectConnection
-    if(!m_udpNetwork.bind(QHostAddress::Any, bindPort, QAbstractSocket::ReuseAddressHint | QAbstractSocket::ShareAddress)) {
+    if(!m_udpNetwork.bind(QHostAddress::AnyIPv4, bindPort, QAbstractSocket::ReuseAddressHint | QAbstractSocket::ShareAddress)) {
         qWarning("Can't bind to UDP");
     }
     else {
