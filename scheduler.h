@@ -22,7 +22,7 @@ public:
     ~Callback();
 private:
     virtual void apply(const DDSDatagram      &datagram); ///<DDS数据
-    virtual void apply(const QByteArray       &datagram); ///<UDP数据
+    virtual void apply(const int &subMSGID, const QByteArray &datagram); ///<UDP数据
     virtual void apply(const DTUDatagram      &datagram); ///<DTU数据
 protected:
     void registerDDS(QString name);
@@ -44,7 +44,7 @@ class SCHEDULERSHARED_EXPORT Scheduler : public QObject
 public:
     explicit Scheduler(QObject *parent = nullptr);
     void startDDS(int ddsID);
-    void startUDP(int bindPort);
+    void startUDP(const QHostAddress &group, int bindPort);
     /*!
      * \brief connectToDTU
      * \param server 串口服务器地址

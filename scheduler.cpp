@@ -30,8 +30,9 @@ void Callback::apply(const DDSDatagram &datagram)
     Q_UNUSED(datagram);
 }
 
-void Callback::apply(const QByteArray &datagram)
+void Callback::apply(const int &subMSGID, const QByteArray &datagram)
 {
+    Q_UNUSED(subMSGID);
     Q_UNUSED(datagram);
 }
 
@@ -83,11 +84,14 @@ void Scheduler::startDDS(int ddsID)
     m_ddsNetwork.start(ddsID);
 }
 
-void Scheduler::startUDP(int bindPort)
+void Scheduler::startUDP(const QHostAddress &group, int bindPort)
 {
     connect(&m_udpNetwork, &QUdpSocket::readyRead, this, &Scheduler::readUDPPendingDatagrams, Qt::AutoConnection);  //really a Qt::DirectConnection
     if(!m_udpNetwork.bind(QHostAddress::Any, bindPort, QAbstractSocket::ReuseAddressHint | QAbstractSocket::ShareAddress)) {
         qWarning("Can't bind to UDP");
+    }
+    else {
+        m_udpNetwork.joinMulticastGroup(group);
     }
 }
 
@@ -204,14 +208,30 @@ void Scheduler::readDDSPendingDatagrams()
 
 void Scheduler::readUDPPendingDatagrams()
 {
+    // Origin from eo_sws_interf.h
+#pragma pack(1)
+    typedef struct
+    {
+        unsigned char syncByte[2];	//同步字 0x74 0x47
+        unsigned char SubMSGID;		//子消息识别码
+        quint16 FrameLen;	//帧长度
+    }STRUCT_CSEO_MSG_HEAD;
+#pragma pack()
+
     QByteArray datagram;
+    QByteArray submsg;
     while (m_udpNetwork.hasPendingDatagrams()) {    //retreive all pending data
         datagram.resize(int(m_udpNetwork.pendingDatagramSize()));
         m_udpNetwork.readDatagram(datagram.data(), datagram.size());
-        const int &identity= *reinterpret_cast<quint8*>(datagram.data());   //标识
-        auto callbacks = m_udpCallbacks.values(identity);
+        const STRUCT_CSEO_MSG_HEAD *head = reinterpret_cast<STRUCT_CSEO_MSG_HEAD*>(datagram.data());
+        if(head->syncByte[0] != 0x74 || head->syncByte[1] != 0x47)
+            continue;
+
+        const int &subMSGID= *reinterpret_cast<quint8*>(head->SubMSGID);   //标识
+        submsg = datagram.right(datagram.size() - sizeof (STRUCT_CSEO_MSG_HEAD));
+        auto callbacks = m_udpCallbacks.values(subMSGID);
         for(Callback* item : callbacks) {
-            item->apply(datagram);
+            item->apply(subMSGID, submsg);
         }
     }
 }
