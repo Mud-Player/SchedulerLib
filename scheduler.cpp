@@ -227,9 +227,10 @@ void Scheduler::readUDPPendingDatagrams()
         if(head->syncByte[0] != 0x74 || head->syncByte[1] != 0x47)
             continue;
 
-        const int &subMSGID= *reinterpret_cast<quint8*>(head->SubMSGID);   //标识
+        const int subMSGID= static_cast<quint8>(head->SubMSGID);   //标识
         submsg = datagram.right(datagram.size() - sizeof (STRUCT_CSEO_MSG_HEAD));
         auto callbacks = m_udpCallbacks.values(subMSGID);
+
         for(Callback* item : callbacks) {
             item->apply(subMSGID, submsg);
         }
