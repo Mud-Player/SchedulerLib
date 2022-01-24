@@ -85,10 +85,14 @@ void Scheduler::startDDS(int ddsID)
 
 void Scheduler::startUDP(int bindPort)
 {
-    connect(&m_udpNetwork, &QUdpSocket::readyRead, this, &Scheduler::readUDPPendingDatagrams, Qt::AutoConnection);  //really a Qt::DirectConnection
-    if(!m_udpNetwork.bind(QHostAddress::Any, bindPort, QAbstractSocket::ReuseAddressHint | QAbstractSocket::ShareAddress)) {
-        qWarning("Can't bind to UDP");
+    auto udp = new QUdpSocket(this);
+    connect(udp, &QUdpSocket::readyRead, this, &Scheduler::readUDPPendingDatagrams, Qt::AutoConnection);  //really a Qt::DirectConnection
+    if(!udp->bind(QHostAddress::Any, bindPort, QAbstractSocket::ReuseAddressHint | QAbstractSocket::ShareAddress)) {
+        qWarning() << "Can't bind to UDP with port:" << bindPort;
+        delete udp;
     }
+    else
+        m_udpReceivers.append(udp);
 }
 
 void Scheduler::startDTU(const QHostAddress &server, const QMap<int, int> &portMap)
@@ -109,7 +113,7 @@ DDSNetwork *Scheduler::getDDSNetwork()
 
 QUdpSocket *Scheduler::getUDPNetwork()
 {
-    return &m_udpNetwork;
+    return &m_udpSender;
 }
 
 DTUNetwork *Scheduler::getDTUNetwork()
@@ -204,10 +208,11 @@ void Scheduler::readDDSPendingDatagrams()
 
 void Scheduler::readUDPPendingDatagrams()
 {
+    auto udp = dynamic_cast<QUdpSocket*>(this->sender());
     QByteArray datagram;
-    while (m_udpNetwork.hasPendingDatagrams()) {    //retreive all pending data
-        datagram.resize(int(m_udpNetwork.pendingDatagramSize()));
-        m_udpNetwork.readDatagram(datagram.data(), datagram.size());
+    while (udp->hasPendingDatagrams()) {    //retreive all pending data
+        datagram.resize(int(udp->pendingDatagramSize()));
+        udp->readDatagram(datagram.data(), datagram.size());
         const int &identity= *reinterpret_cast<quint8*>(datagram.data());   //标识
         auto callbacks = m_udpCallbacks.values(identity);
         for(Callback* item : callbacks) {

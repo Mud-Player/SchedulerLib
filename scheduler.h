@@ -43,7 +43,9 @@ class SCHEDULERSHARED_EXPORT Scheduler : public QObject
     Q_OBJECT
 public:
     explicit Scheduler(QObject *parent = nullptr);
+    /// 开始监听DDS(暂时不支持多个域)
     void startDDS(int ddsID);
+    /// 开始监听UDP(多次调用可以同时监听多个端口)
     void startUDP(int bindPort);
     /*!
      * \brief connectToDTU
@@ -83,9 +85,10 @@ private:
 
 private:
     //
-    DDSNetwork        m_ddsNetwork;
-    QUdpSocket        m_udpNetwork;
-    DTUNetwork        m_dtuNetwork;
+    DDSNetwork         m_ddsNetwork;
+    QUdpSocket         m_udpSender;    ///< 只发送数据，不负责接收
+    QList<QUdpSocket*> m_udpReceivers; ///< 只发送接收，不负责发送
+    DTUNetwork         m_dtuNetwork;
     //
     QMultiHash<QString,Callback*>  m_ddsCallbacks;  ///<用来处理DDS数据的回调<topic,callback>
     QMultiHash<int,Callback*>      m_udpCallbacks;  ///<用来处理UDP数据的回调<identity,callback>
