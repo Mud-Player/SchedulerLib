@@ -213,7 +213,7 @@ void Scheduler::readUDPPendingDatagrams()
     while (udp->hasPendingDatagrams()) {    //retreive all pending data
         datagram.resize(int(udp->pendingDatagramSize()));
         udp->readDatagram(datagram.data(), datagram.size());
-        const int &identity= *reinterpret_cast<quint8*>(datagram.data());   //标识
+        int identity= *reinterpret_cast<int*>(datagram.data());   //标识
         auto callbacks = m_udpCallbacks.values(identity);
         for(Callback* item : callbacks) {
             item->apply(datagram);
@@ -225,7 +225,7 @@ void Scheduler::readDTUPendingDatagrams()
 {
     while (m_dtuNetwork.hasPendingDatagrams()) {
         DTUDatagram datagram = m_dtuNetwork.receiveDatagram();
-        for(Callback* item : m_dtuCallbacks) {
+        for(Callback* item : qAsConst(m_dtuCallbacks)) {
             item->apply(datagram);
         }
     }
