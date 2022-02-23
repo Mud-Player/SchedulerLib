@@ -1,37 +1,47 @@
 ﻿#include "core.h"
 #include "module.h"
-#include <QMapIterator>
+#include <QMutableMapIterator>
 #include <QUdpSocket>
 
-Core::Core(QObject *parent) : QObject(parent)
+Core::Core(QObject *parent) : QObject(parent),
+    m_isRun(false)
 {
     connect(&m_timer, &QTimer::timeout, this, &Core::handleUpdateEvent, Qt::DirectConnection);
+    qRegisterMetaType<Module*>("Module");
 }
 
 void Core::run()
 {
-    for(auto module : qAsConst(m_modules)) {
+    if(m_isRun)
+        return;;
+    m_isRun = true;
+    auto modules = m_modules;
+    for(auto module : qAsConst(modules)) {
         module->preLoad();
     }
-    for(auto module : qAsConst(m_modules)) {
+    for(auto module : qAsConst(modules)) {
         module->load();
     }
-    for(auto module : qAsConst(m_modules)) {
+    for(auto module : qAsConst(modules)) {
         module->postLoad();
     }
 }
 
 void Core::stop()
 {
-    for(auto module : qAsConst(m_modules)) {
+    if(!m_isRun)
+        return;
+    auto modules = m_modules;
+    for(auto module : qAsConst(modules)) {
         module->preUnload();
     }
-    for(auto module : qAsConst(m_modules)) {
+    for(auto module : qAsConst(modules)) {
         module->unload();
     }
-    for(auto module : qAsConst(m_modules)) {
+    for(auto module : qAsConst(modules)) {
         module->postUnload();
     }
+    m_isRun = false;
 }
 
 void Core::setUpdateInterval(int msec)
@@ -45,11 +55,55 @@ void Core::setUpdateInterval(int msec)
 
 void Core::addModule(Module *module, int priority)
 {
-    m_modules.insert(priority, module);
-    module->setParent(this);
+    if(m_isRun) {
+        QMetaObject::invokeMethod(this, "addLoadModule", Qt::QueuedConnection, Q_ARG(Module* ,module));
+    }
+    else {
+        m_modules.insert(priority, module);
+        module->setCore(this);
+        emit added(module);
+    }
 }
 
-bool Core::addUDP(int port)
+void Core::removeModule(Module *module)
+{
+    // unload module
+    module->preUnload();
+    module->unload();
+    module->postUnload();
+
+    {   // remove udp callback
+        QMutableMapIterator<int, Module*> iter(m_udpModules);
+        while(iter.hasNext()) {
+            if(iter.next().value() == module)
+                iter.remove();
+        }
+    }
+    {   // remove module
+        QMutableMapIterator<int, Module*> iter(m_modules);
+        while(iter.hasNext()) {
+            if(iter.next().value() == module) {
+                iter.remove();
+                break;
+            }
+        }
+        module->setCore(nullptr);
+    }
+
+    emit removed(module);
+}
+
+void Core::addLoadModule(Module *module)
+{
+    m_modules.insert(0, module);
+    module->setCore(this);
+    module->preLoad();
+    module->load();
+    module->postLoad();
+    emit added(module);
+}
+
+bool Core::bindUDP(int port)
 {
     auto udp = new QUdpSocket(this);
     connect(udp, &QUdpSocket::readyRead, this, &Core::readUDPPendingDatagrams, Qt::DirectConnection);  //really a Qt::DirectConnection
