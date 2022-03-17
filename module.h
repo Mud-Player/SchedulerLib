@@ -5,6 +5,7 @@
 #include "core.h"
 #include <QObject>
 #include <QUdpSocket>
+#include <QScreen>
 
 /*!
  * \brief 模块
@@ -28,6 +29,33 @@ protected:
     void sendBroadcast(const char *data, qint64 size, quint16 port);
     /// 使用内置UDP发送点对点或者广播数据 \see Module::udpSocket
     void sendDatagram(const char *data, qint64 size, const QHostAddress &address, quint16 port);;
+
+    /// 设置显示区域
+    void setGeometry(const QRect &rect, bool frameless);
+    /// 全屏显示到某个屏幕
+    void setScreen(const QScreen *screen);
+
+    /// 设置背景层显示或隐藏
+    void setBackgroundVisible(bool visible);
+    /// 设置背景层显示或隐藏
+    void setForegroundVisible(bool visible);
+    /// 设置弹窗层显示或隐藏
+    void setPopupVisible(bool visible);
+
+    /// 在背景层添加一个控件, 控件的填充策略由QSizePolicy::Policy决定
+    void addBackgroundWidget(QWidget *widget, Qt::Alignment align);
+    /// 替换背景层的控件, 控件的填充策略由QSizePolicy::Policy决定
+    void replaceBackgroundWidget(QWidget *from, QWidget *to, Qt::Alignment align);
+    /// 移除背景层的控件
+    void removeBackgroundWidget(QWidget *widget);
+    /// 在前景层添加一个控件, 控件的填充策略由QSizePolicy::Policy决定
+    void addForegroundWidget(QWidget *widget, Qt::Alignment align);
+    /// 替换前景层的控件, 控件的填充策略由QSizePolicy::Policy决定
+    void replaceForegroundWidget(QWidget *from, QWidget *to, Qt::Alignment align);
+    /// 移除前景层的控件
+    void removForegroundWidget(QWidget *widget);
+    /// 设置弹窗控件(同一时刻只允许一个弹窗), 控件的填充策略由QSizePolicy::Policy决定
+    void setPopupWidget(QWidget *widget, Qt::Alignment align);
 
 protected:
     /// 设置当前模块归属的Core(子类不因该调用)
