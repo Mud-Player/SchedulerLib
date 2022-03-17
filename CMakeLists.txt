@@ -19,6 +19,8 @@ add_library(${PROJECT_NAME} SHARED
     core.cpp
     module.h
     module.cpp
+    layeredlayout.h
+    layeredlayout.cpp
     packetutility.h
     packetutility.cpp
     packetutilityv2.h
